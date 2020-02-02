@@ -163,7 +163,9 @@ namespace MhwModManager
                 }
                 else
                 {
-                    InstallMod(dir, name);
+                    if(InstallMod(dir, name)) { return true; } 
+                    //Successfully installed in this variant, end
+                    //Otherwise, keep going
                 }
             }
             return false;

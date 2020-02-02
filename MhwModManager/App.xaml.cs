@@ -8,6 +8,7 @@ using System.Windows;
 using System.IO;
 using WinForms = System.Windows.Forms;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace MhwModManager
 {
@@ -35,7 +36,13 @@ namespace MhwModManager
                     Settings.ParseSettingsJSON();
                 }
                 else
+                {
                     Environment.Exit(0);
+                }
+            }
+            if(!File.Exists("armor.json") || !File.Exists("weapon.json"))
+            {
+                //Process.Start(;
             }
         }
 
@@ -86,11 +93,14 @@ namespace MhwModManager
         }
     }
 
+    public enum ModType { Armor, Weapon, Other }
+
     public class ModInfo
     {
         public bool activated { get; set; }
         public int order { get; set; }
         public string name { get; set; }
+        public ModType type { get; set; }   
 
         public void GenInfo(string path, int? index = null)
         {
