@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using common;
 
 namespace MhwModManager
@@ -12,11 +13,21 @@ namespace MhwModManager
     /// </summary>
     public partial class EditWindow : Window, INotifyPropertyChanged
     {
-        private static List<Item> _choices;
-        public List<Item> choices
+        private static List<Item> allChoices;
+        private List<Item> selectedChoices;
+
+        private static List<Item> _selected;
+        public List<Item> selected
         {
-            get { return _choices; }
-            set { _choices = value; OnPropertyChanged("choices"); }
+            get { return _selected; }
+            set { _selected = value; OnPropertyChanged("selected"); }
+        }
+
+        private static List<Item> _possible;
+        public List<Item> possible
+        {
+            get { return _possible; }
+            set { _possible = value; OnPropertyChanged("possible"); }
         }
         
         public event PropertyChangedEventHandler PropertyChanged;
@@ -42,11 +53,18 @@ namespace MhwModManager
             orderTB.Text = info.order.ToString();
 
             this.DataContext = this;
+            
+            selectedChoices = new List<Item>();
+            selectedChoices.AddRange(info.replacedArmors);
+            selectedChoices.AddRange(info.replacedWeapons);
+            this.selected = selectedChoices;
 
-            List<Item> temp = new List<Item>();
-            temp.AddRange(App.armors);
-            temp.AddRange(App.weapons);
-            this.choices = temp;
+            allChoices = new List<Item>();
+            if (info.replacedArmors != null && info.replacedArmors.Count > 0) { allChoices.AddRange(App.armors); }
+            if (info.replacedWeapons != null && info.replacedWeapons.Count > 0) { allChoices.AddRange(App.weapons); }
+            allChoices.RemoveAll(c => selectedChoices.Contains(c));
+            this.possible = allChoices;
+
         }
 
         private void saveBTN_Click(object sender, RoutedEventArgs e)
@@ -69,11 +87,24 @@ namespace MhwModManager
                 }
             }
             mod.SaveSettingsJSON(System.IO.Path.Combine(App.ModsPath, mod.path));
+            Close();
         }
 
         private void cancelBTN_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void OnPossibleTextChanged(object sender, RoutedEventArgs e)
+        {
+            string text = ((TextBox)sender).Text;
+            possible = allChoices.FindAll(c => c.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        private void OnAddedTextChanged(object sender, RoutedEventArgs e)
+        {
+            string text = ((TextBox)sender).Text;
+            selected = selectedChoices.FindAll(c => c.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private void addBTN_Click(object sender, RoutedEventArgs e)
