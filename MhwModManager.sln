@@ -5,13 +5,14 @@ VisualStudioVersion = 15.0.28307.960
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MhwModManager", "MhwModManager\MhwModManager.csproj", "{3088F5B4-9978-437C-88DE-E892614083A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebScraperToJson", "WebScraperToCSV\WebScraperToJson.csproj", "{DBE4C874-38B0-4C8B-BBEA-54A1AA526003}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebScraperToJson", "WebScraperToJson\WebScraperToJson.csproj", "{DBE4C874-38B0-4C8B-BBEA-54A1AA526003}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "common", "common\common.shproj", "{24903E28-308E-4911-A6CA-CD6D6FFC87F3}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		common\common.projitems*{24903e28-308e-4911-a6ca-cd6d6ffc87f3}*SharedItemsImports = 13
+		common\common.projitems*{3088f5b4-9978-437c-88de-e892614083a6}*SharedItemsImports = 4
 		common\common.projitems*{dbe4c874-38b0-4c8b-bbea-54a1aa526003}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

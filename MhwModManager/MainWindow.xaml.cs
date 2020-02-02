@@ -40,15 +40,15 @@ namespace MhwModManager
             foreach (var mod in App.Mods)
             {
                 // Increase the order count if didn't exist
-                if (mod.Item1.order >= App.Mods.Count())
-                    mod.Item1.order = App.Mods.Count() - 1;
+                if (mod.order >= App.Mods.Count())
+                    mod.order = App.Mods.Count() - 1;
 
                 var modItem = new CheckBox
                 {
-                    Tag = mod.Item1.order,
-                    Content = mod.Item1.name
+                    Tag = mod.order,
+                    Content = mod.name
                 };
-                modItem.IsChecked = mod.Item1.activated;
+                modItem.IsChecked = mod.activated;
                 modItem.Checked += itemChecked;
                 modItem.Unchecked += itemChecked;
                 // Adding the context menu
@@ -75,15 +75,17 @@ namespace MhwModManager
 
             // Check if there's mods conflicts
             for (int i = 0; i < App.Mods.Count() - 1; i++)
-                if (!CheckFiles(Path.Combine(App.ModsPath, App.Mods[i].Item2), Path.Combine(App.ModsPath, App.Mods[i + 1].Item2)))
+            {
+                if (!CheckFiles(Path.Combine(App.ModsPath, App.Mods[i].path), Path.Combine(App.ModsPath, App.Mods[i + 1].path)))
                 {
-                    var firstModItem = modListBox.Items[App.Mods[i].Item1.order];
-                    var secondModItem = modListBox.Items[App.Mods[i + 1].Item1.order];
+                    var firstModItem = modListBox.Items[App.Mods[i].order];
+                    var secondModItem = modListBox.Items[App.Mods[i + 1].order];
                     (firstModItem as CheckBox).Foreground = Brushes.Red;
-                    (firstModItem as CheckBox).ToolTip = "Conflict with " + App.Mods[i + 1].Item1.name;
+                    (firstModItem as CheckBox).ToolTip = "Conflict with " + App.Mods[i + 1].name;
                     (secondModItem as CheckBox).Foreground = Brushes.Red;
-                    (secondModItem as CheckBox).ToolTip = "Conflict with " + App.Mods[i].Item1.name;
+                    (secondModItem as CheckBox).ToolTip = "Conflict with " + App.Mods[i].name;
                 }
+            }
         }
 
         private bool CheckFiles(string pathFirstMod, string pathSecondMod)
@@ -103,15 +105,23 @@ namespace MhwModManager
             FileInfo[] filesSecondMod = dirSecondMod.GetFiles();
 
             foreach (FileInfo firstFile in filesFirstMod)
+            {
                 foreach (FileInfo secondFile in filesSecondMod)
+                { 
                     if (firstFile.Name == secondFile.Name && firstFile.Name != "mod.info")
                     {
                         return false; // return false if conflict
                     }
+                }
+            }
 
             foreach (DirectoryInfo subdirFirstMod in dirsFirstMod)
+            {
                 foreach (DirectoryInfo subdirSecondMod in dirsSecondMod)
+                {
                     return CheckFiles(subdirFirstMod.FullName, subdirSecondMod.FullName);
+                }
+            }
 
             return true; // return true if everything's fine
         }
@@ -122,7 +132,9 @@ namespace MhwModManager
             var tmpFolder = Path.Combine(Path.GetTempPath(), "SMMMaddMod");
 
             if (!Directory.Exists(tmpFolder))
+            {
                 Directory.CreateDirectory(tmpFolder);
+            }
 
             // Dialog to select a mod archive
             dialog.DefaultExt = "zip";
@@ -155,10 +167,14 @@ namespace MhwModManager
                 if (dir.Equals(Path.Combine(path, "nativePC"), StringComparison.OrdinalIgnoreCase))
                 {
                     if (!Directory.Exists(Path.Combine(App.ModsPath, name)))
+                    {
                         // If the mod isn't installed
                         Directory.Move(dir, Path.Combine(App.ModsPath, name));
+                    }
                     else
+                    {
                         MessageBox.Show("This mod is already installed", "Simple MHW Mod Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                     return true;
                 }
                 else
@@ -177,10 +193,12 @@ namespace MhwModManager
             {
                 var caller = (mod as CheckBox);
                 var index = int.Parse(caller.Tag.ToString());
-                Directory.Delete(Path.Combine(App.ModsPath, App.Mods[index].Item2), true);
+                Directory.Delete(Path.Combine(App.ModsPath, App.Mods[index].path), true);
                 App.Mods.RemoveAt(index);
                 for (int i = index; i < App.Mods.Count(); i++)
-                    App.Mods[i].Item1.order = i;
+                {
+                    App.Mods[i].order = i;
+                }
             }
             UpdateModsList();
         }
@@ -211,11 +229,13 @@ namespace MhwModManager
         {
             // Get the full path of the mod
             var index = int.Parse((sender as CheckBox).Tag.ToString());
-            var mod = Path.Combine(App.ModsPath, App.Mods[index].Item2);
+            var mod = Path.Combine(App.ModsPath, App.Mods[index].path);
 
             if ((sender as CheckBox).IsChecked.Value == true)
+            {
                 // Install the mod
                 DirectoryCopy(mod, Path.Combine(App.Settings.settings.mhw_path, "nativePC"), true);
+            }
             else
             {
                 // Desinstall the mod
@@ -223,10 +243,10 @@ namespace MhwModManager
                 CleanFolder(Path.Combine(App.Settings.settings.mhw_path, "nativePC"));
             }
 
-            var info = App.Mods[index].Item1;
+            var info = App.Mods[index];
             info.GenInfo(mod);
             info.activated = (sender as CheckBox).IsChecked.Value;
-            info.ParseSettingsJSON(mod);
+            info.SaveSettingsJSON(mod);
         }
 
         // Credits to https://docs.microsoft.com/fr-fr/dotnet/standard/io/how-to-copy-directories
@@ -238,7 +258,9 @@ namespace MhwModManager
             DirectoryInfo[] dirs = dir.GetDirectories();
             // If the destination directory doesn't exist, create it.
             if (!Directory.Exists(destDirName))
+            {
                 Directory.CreateDirectory(destDirName);
+            }
 
             // Get the files in the directory and copy them to the new location.
             FileInfo[] files = dir.GetFiles();
@@ -246,17 +268,23 @@ namespace MhwModManager
             {
                 string temppath = Path.Combine(destDirName, file.Name);
                 if (!file.Name.Equals("mod.info"))
+                {
                     if (!File.Exists(temppath))
+                    {
                         file.CopyTo(temppath, false);
+                    }
+                }
             }
 
             // If copying subdirectories, copy them and their contents to new location.
             if (copySubDirs)
+            {
                 foreach (DirectoryInfo subdir in dirs)
                 {
                     string temppath = Path.Combine(destDirName, subdir.Name);
                     DirectoryCopy(subdir.FullName, temppath, copySubDirs);
                 }
+            }
         }
 
         private static void DeleteMod(string modPath, string folder)
@@ -276,16 +304,24 @@ namespace MhwModManager
             FileInfo[] files = dir.GetFiles();
 
             foreach (FileInfo modfile in modFiles)
+            {
                 foreach (FileInfo file in files)
+                {
                     if (modfile.Name == file.Name)
                     {
                         file.Delete();
                         break;
                     }
+                }
+            }
 
             foreach (DirectoryInfo submoddir in modDirs)
+            {
                 foreach (DirectoryInfo subdir in dirs)
+                {
                     DeleteMod(submoddir.FullName, subdir.FullName);
+                }
+            }
         }
 
         private static void CleanFolder(string folder)
@@ -306,12 +342,12 @@ namespace MhwModManager
         {
             var caller = (((sender as MenuItem).Parent as ContextMenu).PlacementTarget as CheckBox);
             var index = int.Parse(caller.Tag.ToString());
-            Directory.Delete(Path.Combine(App.ModsPath, App.Mods[index].Item2), true);
+            Directory.Delete(Path.Combine(App.ModsPath, App.Mods[index].path), true);
             App.Mods.RemoveAt(index);
             for (int i = index; i < App.Mods.Count(); i++)
             {
-                App.Mods[i].Item1.order = i;
-                App.Mods[i].Item1.ParseSettingsJSON(Path.Combine(App.ModsPath, App.Mods[i].Item2));
+                App.Mods[i].order = i;
+                App.Mods[i].SaveSettingsJSON(Path.Combine(App.ModsPath, App.Mods[i].path));
             }
 
             UpdateModsList();
@@ -320,12 +356,12 @@ namespace MhwModManager
         private void editModContext_Click(object sender, RoutedEventArgs e)
         {
             var caller = (((sender as MenuItem).Parent as ContextMenu).PlacementTarget as CheckBox);
-            editMod(App.Mods[int.Parse(caller.Tag.ToString())].Item2);
+            editMod(App.Mods[(int)caller.Tag]);
         }
-
-        private void editMod(string folderName)
+        
+        private void editMod(ModInfo mod)
         {
-            var editWindow = new EditWindow(folderName);
+            var editWindow = new EditWindow(mod);
             editWindow.Owner = Application.Current.MainWindow;
             editWindow.ShowDialog();
             UpdateModsList();

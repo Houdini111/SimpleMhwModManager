@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.IO;
 using WinForms = System.Windows.Forms;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using common;
 
 namespace MhwModManager
 {
@@ -21,7 +19,9 @@ namespace MhwModManager
         public static string ModsPath = Path.Combine(AppData, "mods");
         public static Setting Settings = new Setting();
         public static string SettingsPath = Path.Combine(AppData, "settings.json");
-        public static List<(ModInfo, string)> Mods;
+        public static List<ModInfo> Mods;
+        public static List<Armor> armors;
+        public static List<Weapon> weapons;
 
         public App()
         {
@@ -42,14 +42,35 @@ namespace MhwModManager
             }
             if(!File.Exists("armor.json") || !File.Exists("weapon.json"))
             {
-                //Process.Start(;
+                ProcessStartInfo psi = new ProcessStartInfo("WebScraperToJson.exe");
+                psi.UseShellExecute = false;
+                psi.RedirectStandardOutput = true;
+                Process p = new Process();
+                p.StartInfo = psi;
+                p.Start();
+                p.WaitForExit();
+            }
+            if (!File.Exists("armor.json") || !File.Exists("weapon.json"))
+            {
+                MessageBox.Show("Cannot find or scrape for armor and weapon data."+Environment.NewLine+"Editing changed equipment will be disabled.", "Simple MHW Mod Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                using (StreamReader file = new StreamReader("armor.json"))
+                {
+                    armors = JsonConvert.DeserializeObject<List<Armor>>(file.ReadToEnd());
+                }
+                using (StreamReader file = new StreamReader("weapon.json"))
+                {
+                    weapons = JsonConvert.DeserializeObject<List<Weapon>>(file.ReadToEnd());
+                }
             }
         }
 
         public static void GetMods()
         {
             // This list contain the ModInfos and the folder name of each mod
-            Mods = new List<(ModInfo, string)>();
+            Mods = new List<ModInfo>();
 
             if (!Directory.Exists(ModsPath))
                 Directory.CreateDirectory(ModsPath);
@@ -63,16 +84,20 @@ namespace MhwModManager
                 info.GenInfo(mod.FullName);
                 // If the order change the generation of the list
                 if (info.order >= Mods.Count)
-                    Mods.Add((info, mod.Name));
+                {
+                    Mods.Add(info);
+                }
                 else
                 {
                     if (i > 0)
-                        if (info.order == Mods[i - 1].Item1.order)
+                    {
+                        if (info.order == Mods[i - 1].order)
                         {
                             info.order++;
-                            info.ParseSettingsJSON(mod.FullName);
+                            info.SaveSettingsJSON(mod.FullName);
                         }
-                    Mods.Insert(info.order, (info, mod.Name));
+                    }
+                    Mods.Insert(info.order, info);
                 }
                 i++;
             }
@@ -88,57 +113,70 @@ namespace MhwModManager
             {
                 var result = MessageBox.Show("A new version is available, do you want to download it now ?", "SMMM", MessageBoxButton.YesNo, MessageBoxImage.Information);
                 if (result == MessageBoxResult.Yes)
-                    System.Diagnostics.Process.Start("https://github.com/oxypomme/SimpleMhwModManager/releases/latest");
+                {
+                    Process.Start("https://github.com/oxypomme/SimpleMhwModManager/releases/latest");
+                }
             }
         }
     }
-
-    public enum ModType { Armor, Weapon, Other }
-
+    
     public class ModInfo
     {
+        public string path { get; set; }
         public bool activated { get; set; }
         public int order { get; set; }
-        public string name { get; set; }
-        public ModType type { get; set; }   
+        public string name { get; set; } 
+        public List<Armor> replacedArmors { get; set; }
+        public List<Weapon> replacedWeapons { get; set; }
 
         public void GenInfo(string path, int? index = null)
         {
             if (!File.Exists(Path.Combine(path, "mod.info")))
             {
+                this.path = path;
                 activated = false;
                 if (index != null)
+                {
                     order = index.Value;
+                }
                 else
+                {
                     order = App.Mods.Count();
+                }
 
                 // Get the name of the extracted folder (without the .zip at the end), not the full path
                 var foldName = path.Split('\\');
                 name = foldName[foldName.GetLength(0) - 1].Split('.')[0];
+                
+                replacedArmors = App.armors.FindAll(a => 
+                    (Directory.Exists(Path.Combine(path, a.male_location)) && !String.IsNullOrWhiteSpace(a.male_location)) || 
+                    (Directory.Exists(Path.Combine(path, a.female_location)) && !String.IsNullOrWhiteSpace(a.female_location))).ToList();
+                replacedWeapons = App.weapons.FindAll(w => 
+                    Directory.Exists(Path.Combine(path, w.main_model)) || 
+                    (Directory.Exists(Path.Combine(path, w.part_model)) && !String.IsNullOrWhiteSpace(w.part_model))).ToList();
 
-                ParseSettingsJSON(path);
+                SaveSettingsJSON(path);
             }
             else
             {
-                ModInfo sets;
                 using (StreamReader file = new StreamReader(Path.Combine(path, "mod.info")))
                 {
-                    sets = JsonConvert.DeserializeObject<ModInfo>(file.ReadToEnd());
-                    file.Close();
+                    ModInfo sets = JsonConvert.DeserializeObject<ModInfo>(file.ReadToEnd());
+                    this.path = sets.path;
+                    this.activated = sets.activated;
+                    this.order = sets.order;
+                    this.name = sets.name;
+                    this.replacedArmors = sets.replacedArmors;
+                    this.replacedWeapons = sets.replacedWeapons;
                 }
-
-                activated = sets.activated;
-                order = sets.order;
-                name = sets.name;
             }
         }
 
-        public void ParseSettingsJSON(string path)
+        public void SaveSettingsJSON(string path)
         {
             using (StreamWriter file = new StreamWriter(Path.Combine(path, "mod.info")))
             {
                 file.Write(JsonConvert.SerializeObject(this, Formatting.Indented));
-                file.Close();
             }
         }
     }

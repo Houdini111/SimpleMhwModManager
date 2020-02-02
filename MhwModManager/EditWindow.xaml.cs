@@ -1,62 +1,74 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using common;
 
 namespace MhwModManager
 {
     /// <summary>
     /// Logique d'interaction pour EditWindow.xaml
     /// </summary>
-    public partial class EditWindow : Window
+    public partial class EditWindow : Window, INotifyPropertyChanged
     {
-        private string modPath;
-        private int index;
-        private int? order;
-
-        public EditWindow(string path)
+        private static List<Item> _choices;
+        public List<Item> choices
         {
-            InitializeComponent();
-            modPath = path;
-            int i = 0;
-            foreach (var mod in App.Mods)
+            get { return _choices; }
+            set { _choices = value; OnPropertyChanged("choices"); }
+        }
+        
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        void OnPropertyChanged(string prop)
+        {
+            if(this.PropertyChanged != null)
             {
-                if (mod.Item2 == path)
-                {
-                    index = i;
-
-                    nameTB.Text = mod.Item1.name;
-                    nameTB.TextChanged += nameTB_TextChanged;
-
-                    order = mod.Item1.order + 1;
-                    orderTB.Text = order.ToString();
-                    orderTB.TextChanged += orderTB_TextChanged;
-
-                    break;
-                }
-                i++;
+                this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
             }
         }
 
-        private void validateBTN_Click(object sender, RoutedEventArgs e)
+        private string originalName;
+        private int originalOrder;
+
+
+        public EditWindow(ModInfo info)
         {
-            if (order != null)
+            InitializeComponent();
+            originalName = info.name;
+            originalOrder = info.order;
+            nameTB.Text = info.name;
+            orderTB.Text = info.order.ToString();
+
+            this.DataContext = this;
+
+            List<Item> temp = new List<Item>();
+            temp.AddRange(App.armors);
+            temp.AddRange(App.weapons);
+            this.choices = temp;
+        }
+
+        private void saveBTN_Click(object sender, RoutedEventArgs e)
+        {
+            int order = Int32.Parse(orderTB.Text);
+            ModInfo mod = App.Mods[originalOrder];
+            mod.name = nameTB.Text;
+            //TODO 
+            //App.Mods[order].replacedArmors = selectedItems.Items;
+            if (order != originalOrder)
             {
-                foreach (var mod in App.Mods)
+                mod.order = order;
+                //Number already exists, swap them
+                if(App.Mods[order] != null)
                 {
-                    if (mod.Item1.order == order.Value)
-                    {
-                        // If the new order is already given, exchange them
-                        mod.Item1.order = App.Mods[index].Item1.order;
-                        mod.Item1.ParseSettingsJSON(System.IO.Path.Combine(App.ModsPath, mod.Item2));
-                        break;
-                    }
+                    ModInfo swappedWith = App.Mods[order];
+                    swappedWith.order = originalOrder;
+                    App.Mods[order] = mod;
+                    App.Mods[originalOrder] = swappedWith;
                 }
-                App.Mods[index].Item1.order = order.Value;
-                App.Mods[index].Item1.ParseSettingsJSON(System.IO.Path.Combine(App.ModsPath, modPath));
-                Close();
             }
-            else
-                MessageBox.Show("The order must be a number !", "Simple MHW Mod Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+            mod.SaveSettingsJSON(System.IO.Path.Combine(App.ModsPath, mod.path));
         }
 
         private void cancelBTN_Click(object sender, RoutedEventArgs e)
@@ -64,20 +76,25 @@ namespace MhwModManager
             Close();
         }
 
-        private void nameTB_TextChanged(object sender, TextChangedEventArgs e)
+        private void addBTN_Click(object sender, RoutedEventArgs e)
         {
-            App.Mods[index].Item1.name = nameTB.Text;
+
         }
 
-        private void orderTB_TextChanged(object sender, TextChangedEventArgs e)
+        private void removeBTN_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        
+        private void NumericInputPreviewer(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             try
             {
-                order = int.Parse(orderTB.Text);
+                int parsed = Int32.Parse(e.Text);
             }
-            catch (FormatException)
+            catch(Exception ex)
             {
-                order = null;
+                e.Handled = false;
             }
         }
     }

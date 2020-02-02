@@ -46,7 +46,7 @@ namespace WebScraperToCSV
             {
                 Armor armor = new Armor();
                 armor.type = (Armor.ARMOR_SLOT)Enum.Parse(typeof(Armor.ARMOR_SLOT), row.Cells[0].InnerHtml, true);
-                armor.armor_ID = Int32.Parse(row.Cells[1].InnerHtml);
+                armor.ID = Int32.Parse(row.Cells[1].InnerHtml);
                 armor.name = row.Cells[2].InnerHtml;
                 armor.layered_ID = Int32.Parse(row.Cells[3].InnerHtml);
                 armor.male_location = row.Cells[4].InnerHtml;
