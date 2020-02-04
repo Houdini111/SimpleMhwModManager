@@ -33,7 +33,7 @@ namespace MhwModManager
                 if (dialog.ShowDialog() == WinForms.DialogResult.OK)
                 {
                     Settings.settings.mhw_path = dialog.SelectedPath;
-                    Settings.ParseSettingsJSON();
+                    Settings.SaveSettingsJSON();
                 }
                 else
                 {

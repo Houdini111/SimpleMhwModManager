@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MhwModManager"
         mc:Ignorable="d"
-        Title="Simple MHW Mod Manager" Height="400" Width="350">
-    <Grid>
+        Title="Simple MHW Mod Manager" Height="450" Width="600">
+    <Grid AllowDrop="True" Drop="DropHandler">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />

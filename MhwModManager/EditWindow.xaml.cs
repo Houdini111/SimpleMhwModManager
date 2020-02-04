@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -11,38 +12,29 @@ namespace MhwModManager
     /// <summary>
     /// Logique d'interaction pour EditWindow.xaml
     /// </summary>
-    public partial class EditWindow : Window, INotifyPropertyChanged
+    public partial class EditWindow : Window
     {
-        private static List<Item> allChoices;
-        private List<Item> selectedChoices;
-
-        private static List<Item> _selected;
-        public List<Item> selected
-        {
-            get { return _selected; }
-            set { _selected = value; OnPropertyChanged("selected"); }
-        }
-
-        private static List<Item> _possible;
-        public List<Item> possible
-        {
-            get { return _possible; }
-            set { _possible = value; OnPropertyChanged("possible"); }
-        }
-        
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        void OnPropertyChanged(string prop)
-        {
-            if(this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
-            }
-        }
-
         private string originalName;
         private int originalOrder;
 
+        public ObservableCollection<Armor> possibleHeads { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> possibleChests { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> possibleArms { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> possibleWaists { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> possibleLegs { get; set; } = new ObservableCollection<Armor>();
+
+        public ObservableCollection<Weapon> possibleMain { get; set; } = new ObservableCollection<Weapon>();
+        public ObservableCollection<Weapon> possiblePart { get; set; } = new ObservableCollection<Weapon>();
+
+        public ObservableCollection<Armor> addedHeads { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> addedChests { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> addedArms { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> addedWaists { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> addedLegs { get; set; } = new ObservableCollection<Armor>();
+        
+        public ObservableCollection<Weapon> addedMain { get; set; } = new ObservableCollection<Weapon>();
+        public ObservableCollection<Weapon> addedPart { get; set; } = new ObservableCollection<Weapon>();
+        
 
         public EditWindow(ModInfo info)
         {
@@ -53,18 +45,82 @@ namespace MhwModManager
             orderTB.Text = info.order.ToString();
 
             this.DataContext = this;
+
+            #region Adding items
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD).ToList().ForEach(a => possibleHeads.Add(a));
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST).ToList().ForEach(a => possibleChests.Add(a));
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS).ToList().ForEach(a => possibleArms.Add(a));
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST).ToList().ForEach(a => possibleWaists.Add(a));
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS).ToList().ForEach(a => possibleLegs.Add(a));
+
+            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model)).ToList().ForEach(w => possibleMain.Add(w));
+            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model)).ToList().ForEach(w => possiblePart.Add(w));
             
-            selectedChoices = new List<Item>();
-            selectedChoices.AddRange(info.replacedArmors);
-            selectedChoices.AddRange(info.replacedWeapons);
-            this.selected = selectedChoices;
 
-            allChoices = new List<Item>();
-            if (info.replacedArmors != null && info.replacedArmors.Count > 0) { allChoices.AddRange(App.armors); }
-            if (info.replacedWeapons != null && info.replacedWeapons.Count > 0) { allChoices.AddRange(App.weapons); }
-            allChoices.RemoveAll(c => selectedChoices.Contains(c));
-            this.possible = allChoices;
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD).ToList().ForEach(a => addedHeads.Add(a));
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST).ToList().ForEach(a => addedChests.Add(a));
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS).ToList().ForEach(a => addedArms.Add(a));
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST).ToList().ForEach(a => addedWaists.Add(a));
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS).ToList().ForEach(a => addedLegs.Add(a));
 
+            info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model)).ToList().ForEach(w => addedMain.Add(w));
+            info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model)).ToList().ForEach(w => addedPart.Add(w));
+            #endregion
+
+            #region Tab visibility
+            if (addedHeads.Count < 1 && addedChests.Count < 1 && addedArms.Count < 1 && addedWaists.Count < 1 && addedLegs.Count < 1)
+            {
+                PossibleArmorTab.Visibility = Visibility.Collapsed;
+                AddedArmorTab.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                if (addedHeads.Count < 1)
+                {
+                    AddedHeadTab.Visibility = Visibility.Collapsed;
+                    AddedHeadTab.Visibility = Visibility.Collapsed;
+                }
+                if (addedChests.Count < 1)
+                {
+                    PossibleChestTab.Visibility = Visibility.Collapsed;
+                    AddedChestTab.Visibility = Visibility.Collapsed;
+                }
+                if (addedArms.Count < 1)
+                {
+                    PossibleArmTab.Visibility = Visibility.Collapsed;
+                    AddedArmTab.Visibility = Visibility.Collapsed;
+                }
+                if (addedWaists.Count < 1)
+                {
+                    PossibleWaistTab.Visibility = Visibility.Collapsed;
+                    AddedWaistTab.Visibility = Visibility.Collapsed;
+                }
+                if (addedLegs.Count < 1)
+                {
+                    PossibleLegTab.Visibility = Visibility.Collapsed;
+                    AddedLegTab.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            if (addedMain.Count < 1 && addedPart.Count < 1)
+            {
+                PossibleWeaponTab.Visibility = Visibility.Collapsed;
+                AddedWeaponTab.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                if (addedMain.Count < 1)
+                {
+                    PossibleMainTab.Visibility = Visibility.Collapsed;
+                    AddedMainTab.Visibility = Visibility.Collapsed;
+                }
+                if (addedPart.Count < 1)
+                {
+                    PossiblePartialTab.Visibility = Visibility.Collapsed;
+                    AddedPartialTab.Visibility = Visibility.Collapsed;
+                }
+            }
+            #endregion
         }
 
         private void saveBTN_Click(object sender, RoutedEventArgs e)
@@ -98,13 +154,13 @@ namespace MhwModManager
         private void OnPossibleTextChanged(object sender, RoutedEventArgs e)
         {
             string text = ((TextBox)sender).Text;
-            possible = allChoices.FindAll(c => c.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0);
+            //possible = allChoices.FindAll(c => c.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private void OnAddedTextChanged(object sender, RoutedEventArgs e)
         {
             string text = ((TextBox)sender).Text;
-            selected = selectedChoices.FindAll(c => c.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0);
+            //selected = selectedChoices.FindAll(c => c.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private void addBTN_Click(object sender, RoutedEventArgs e)

@@ -49,7 +49,7 @@ namespace MhwModManager
 
                 settings.dark_mode = false;
                 settings.mhw_path = FindMHWInstallFolder();
-                ParseSettingsJSON();
+                SaveSettingsJSON();
             }
             else
             {
@@ -67,12 +67,11 @@ namespace MhwModManager
             }
         }
 
-        public void ParseSettingsJSON()
+        public void SaveSettingsJSON()
         {
             using (StreamWriter file = new StreamWriter(App.SettingsPath))
             {
                 file.Write(JsonConvert.SerializeObject(this, Formatting.Indented));
-                file.Close();
             }
         }
 
@@ -126,7 +125,7 @@ namespace MhwModManager
 
         private void validateBTN_Click(object sender, RoutedEventArgs e)
         {
-            App.Settings.ParseSettingsJSON();
+            App.Settings.SaveSettingsJSON();
             Close();
         }
     }

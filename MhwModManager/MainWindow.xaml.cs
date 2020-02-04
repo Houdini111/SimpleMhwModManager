@@ -1,20 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Diagnostics;
 using System.IO;
-using WinForms = System.Windows.Forms;
 using System.IO.Compression;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using WinForms = System.Windows.Forms;
 
 namespace MhwModManager
 {
@@ -23,6 +15,8 @@ namespace MhwModManager
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static string tmpFolder = Path.Combine(Path.GetTempPath(), "SMMMaddMod");
+
         public MainWindow()
         {
             InitializeComponent();
@@ -71,20 +65,42 @@ namespace MhwModManager
                 modListBox.Items.Add(modItem);
             }
 
-            App.Settings.ParseSettingsJSON();
+            App.Settings.SaveSettingsJSON();
 
             // Check if there's mods conflicts
+            bool conflict = false;
             for (int i = 0; i < App.Mods.Count() - 1; i++)
             {
-                if (!CheckFiles(Path.Combine(App.ModsPath, App.Mods[i].path), Path.Combine(App.ModsPath, App.Mods[i + 1].path)))
+                for (int j = 0; j < App.Mods.Count() - 1; j++)
                 {
-                    var firstModItem = modListBox.Items[App.Mods[i].order];
-                    var secondModItem = modListBox.Items[App.Mods[i + 1].order];
-                    (firstModItem as CheckBox).Foreground = Brushes.Red;
-                    (firstModItem as CheckBox).ToolTip = "Conflict with " + App.Mods[i + 1].name;
-                    (secondModItem as CheckBox).Foreground = Brushes.Red;
-                    (secondModItem as CheckBox).ToolTip = "Conflict with " + App.Mods[i].name;
+                    if (i == j) { continue; }
+                    if (!CheckFiles(Path.Combine(App.ModsPath, App.Mods[i].path), Path.Combine(App.ModsPath, App.Mods[i + 1].path)))
+                    {
+                        conflict = true;
+                        var firstModItem = modListBox.Items[App.Mods[i].order];
+                        var secondModItem = modListBox.Items[App.Mods[i + 1].order];
+                        (firstModItem as CheckBox).Foreground = Brushes.Red;
+                        (firstModItem as CheckBox).ToolTip = "Conflict with " + App.Mods[i + 1].name;
+                        (secondModItem as CheckBox).Foreground = Brushes.Red;
+                        (secondModItem as CheckBox).ToolTip = "Conflict with " + App.Mods[i].name;
+                    }
                 }
+            }
+            if (!conflict)
+            {
+                //foreach(ModInfo mod in App.Mods)
+                //{
+                //    DirectoryCopy( App.Settings.settings.mhw_path)
+                //}
+            }
+            else
+            {
+                string path = Path.Combine(App.Settings.settings.mhw_path, "nativePC");
+                if(Directory.Exists(path))
+                {
+                    Directory.Delete(path, true);
+                }
+                Directory.CreateDirectory(path);
             }
         }
 
@@ -129,7 +145,6 @@ namespace MhwModManager
         private void addMod_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new WinForms.OpenFileDialog();
-            var tmpFolder = Path.Combine(Path.GetTempPath(), "SMMMaddMod");
 
             if (!Directory.Exists(tmpFolder))
             {
@@ -142,22 +157,46 @@ namespace MhwModManager
             dialog.Multiselect = true;
             if (dialog.ShowDialog() == WinForms.DialogResult.OK)
             {
-                foreach (var file in dialog.FileNames)
+                foreach (string file in dialog.FileNames)
                 {
-                    // Separate the path and unzip mod
-                    var splittedPath = file.Split('\\');
-                    ZipFile.ExtractToDirectory(dialog.FileName, tmpFolder);
-
-                    // Get the name of the extracted folder (without the .zip at the end), not the full path
-                    if (!InstallMod(tmpFolder, splittedPath[splittedPath.GetLength(0) - 1].Split('.')[0]))
-                        // If the install fail
-                        MessageBox.Show("nativePC not found... Please check if it's exist in the mod...", "Simple MHW Mod Manager", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Directory.Delete(tmpFolder, true);
-
-                    App.GetMods(); // Refresh the modlist
+                    InstallMod(file);
                 }
             }
             UpdateModsList();
+        }
+
+        private void InstallMod(string path)
+        {
+            // Separate the path and unzip mod
+            string[] splitPath = path.Split('\\');
+            string folderName = splitPath[splitPath.GetLength(0) - 1].Split('.')[0];
+            if (path.EndsWith(".zip"))
+            {
+                ZipFile.ExtractToDirectory(path, tmpFolder);
+            }
+            else
+            {
+                DirectoryCopy(path, Path.Combine(tmpFolder, folderName), true);
+            }
+
+            // Get the name of the extracted folder (without the .zip at the end), not the full path
+            if (!InstallMod(tmpFolder, folderName))
+            {
+                if (Directory.Exists(Path.Combine(App.ModsPath, folderName)))
+                {
+                    MessageBox.Show("This mod is already installed", "Simple MHW Mod Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    Directory.Move(Path.Combine(tmpFolder, folderName), Path.Combine(App.ModsPath, folderName));
+                    MessageBox.Show("nativePC not found, interpreting root as nativePC, this mod may not work correctly.", "Simple MHW Mod Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                // If the install failed
+                //MessageBox.Show("nativePC not found... Please check if it's exist in the mod...", "Simple MHW Mod Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            Directory.Delete(tmpFolder, true);
+
+            App.GetMods(); // Refresh the modlist
         }
 
         private bool InstallMod(string path, string name)
@@ -166,6 +205,7 @@ namespace MhwModManager
             {
                 if (dir.Equals(Path.Combine(path, "nativePC"), StringComparison.OrdinalIgnoreCase))
                 {
+                    if(Directory.GetParent(dir).Name.Equals("ings")) { continue; } //Not the right nativePC
                     if (!Directory.Exists(Path.Combine(App.ModsPath, name)))
                     {
                         // If the mod isn't installed
@@ -333,8 +373,10 @@ namespace MhwModManager
             {
                 CleanFolder(subdir.FullName);
                 if (!Directory.EnumerateFileSystemEntries(subdir.FullName).Any())
+                {
                     // If the directory is empty
                     Directory.Delete(subdir.FullName);
+                }
             }
         }
 
@@ -364,6 +406,24 @@ namespace MhwModManager
             var editWindow = new EditWindow(mod);
             editWindow.Owner = Application.Current.MainWindow;
             editWindow.ShowDialog();
+            UpdateModsList();
+        }
+
+        private void DropHandler(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                // Note that you can have more than one file.
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                foreach(string file in files)
+                {
+                    if(file.EndsWith(".zip") || Directory.Exists(Path.Combine(file, "nativePC")))
+                    {
+                        InstallMod(file);
+                    }
+                }
+            }
             UpdateModsList();
         }
     }
