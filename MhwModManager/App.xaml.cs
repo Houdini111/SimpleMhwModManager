@@ -125,7 +125,9 @@ namespace MhwModManager
         public string path { get; set; }
         public bool activated { get; set; }
         public int order { get; set; }
-        public string name { get; set; } 
+        public string name { get; set; }
+        public List<Armor> originalReplacedArmors { get; set; }
+        public List<Weapon> originalReplacedWeapons { get; set; }
         public List<Armor> replacedArmors { get; set; }
         public List<Weapon> replacedWeapons { get; set; }
 
@@ -154,6 +156,8 @@ namespace MhwModManager
                 replacedWeapons = App.weapons.FindAll(w => 
                     Directory.Exists(Path.Combine(path, w.main_model)) || 
                     (Directory.Exists(Path.Combine(path, w.part_model)) && !String.IsNullOrWhiteSpace(w.part_model))).ToList();
+                originalReplacedArmors = replacedArmors;
+                originalReplacedWeapons = replacedWeapons;
 
                 SaveSettingsJSON(path);
             }

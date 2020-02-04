@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MhwModManager"
         xmlns:c="clr-namespace:common"
-        xmlns:scm="clr-namespace:System.ComponentModel;assembly=Wind‌​owsBase"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         Title="SMM - Settings" Height="450" Width="650">
@@ -67,7 +66,7 @@
         <Grid Grid.Column="1" Grid.Row="2" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
-                <ColumnDefinition Width="55" />
+                <ColumnDefinition Width="65" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -76,78 +75,82 @@
             </Grid.RowDefinitions>
             <Grid.Resources>
                 <DataTemplate DataType="{x:Type c:Armor}">
-                    <TextBlock Text="{Binding Path=name}" Foreground="Red" />
+                    <TextBlock Text="{Binding Path=name}" />
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type c:Weapon}">
-                    <TextBlock Text="{Binding Path=name}" Foreground="Blue" />
+                    <TextBlock Text="{Binding Path=name}" />
                 </DataTemplate>
             </Grid.Resources>
 
-            <TextBox Grid.Column="0" Grid.Row="0" Height="20" TextChanged="OnPossibleTextChanged"/>
+            <TextBox Name="PossibleSearchBox" Grid.Column="0" Grid.Row="0" Height="20" TextChanged="OnPossibleTextChanged"/>
 
-            <TabControl Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <TabControl Name="PossibleTabControl" Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="TabControlSelectionChanged">
                 <TabItem Header="Armor" Name="PossibleArmorTab">
-                    <TabControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <TabControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="TabControlSelectionChanged">
                         <TabItem Header="Head" Name="PossibleHeadTab">
-                            <ListView ItemsSource="{Binding possibleHeads, Mode=TwoWay}"/>
+                            <ListView ItemsSource="{Binding displayedAllHeads, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Chest" Name="PossibleChestTab">
-                            <ListView ItemsSource="{Binding possibleChests, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAllChests, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Arm" Name="PossibleArmTab">
-                            <ListView ItemsSource="{Binding possibleArms, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAllArms, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Waist" Name="PossibleWaistTab">
-                            <ListView ItemsSource="{Binding possibleWaists, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAllWaists, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Leg" Name="PossibleLegTab">
-                            <ListView ItemsSource="{Binding possibleLegs, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAllLegs, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                     </TabControl>
                 </TabItem>
                 <TabItem Header="Weapons" Name="PossibleWeaponTab">
-                    <TabControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <TabControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="TabControlSelectionChanged">
                         <TabItem Header="Main" Name="PossibleMainTab">
-                            <ListView ItemsSource="{Binding possibleMains, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAllMains, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Partial" Name="PossiblePartialTab">
-                            <ListView ItemsSource="{Binding possibleParts, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAllParts, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                     </TabControl>
                 </TabItem>
             </TabControl>
-            <TextBox Grid.Column="2" Grid.Row="0" Height="20" TextChanged="OnAddedTextChanged" />
+            <TextBox Name="AddedSearchBox" Grid.Column="2" Grid.Row="0" Height="20" TextChanged="OnAddedTextChanged" />
             <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
-                <Button Name="addBTN" Content="&gt;&gt;" Click="addBTN_Click" Width="45" Padding="5" Margin="5" Style="{StaticResource RegularButton}" />
-                <Button Name="removeBTN" Content="&lt;&lt;" Click="removeBTN_Click" Width="45" Padding="5" Margin="5" Style="{StaticResource RegularButton}" />
+                <Button Name="addSetBTN" Content="&gt;&gt;&gt;" Click="AddSetBTN_Click" Width="55" Padding="5" Margin="5" Style="{StaticResource RegularButton}" />
+                <Button Name="addBTN" Content="&gt;&gt;" Click="addBTN_Click" Width="55" Padding="5" Margin="5,5,5,30" Style="{StaticResource RegularButton}" />
+                <Button Name="removeBTN" Content="&lt;&lt;" Click="removeBTN_Click" Width="55" Padding="5" Margin="5" Style="{StaticResource RegularButton}" />
+                <Button Name="removeSetBTN" Content="&lt;&lt;&lt;" Click="RemoveSetBTN_Click" Width="55" Padding="5" Margin="5,5,5,30" Style="{StaticResource RegularButton}" />
+                <Button Name="resetBTN" Content="Reset" Click="ResetBTN_Click" Width="55" Padding="5" Margin="5" Style="{StaticResource RegularButton}" />
+                <Button Name="defaultBTN" Content="Default" Click="DefaultBTN_Click" Width="55" Padding="5" Margin="5" Style="{StaticResource RegularButton}" />
             </StackPanel>
-            <TabControl Grid.Column="2" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <TabControl Name="AddedTabControl" Grid.Column="2" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="TabControlSelectionChanged">
                 <TabItem Header="Armor" Name="AddedArmorTab">
-                    <TabControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <TabControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="TabControlSelectionChanged">
                         <TabItem Header="Head" Name="AddedHeadTab">
-                            <ListView ItemsSource="{Binding addedHeads, Mode=TwoWay}"/>
+                            <ListView ItemsSource="{Binding displayedAddedHeads, Mode=TwoWay}" SelectionMode="Extended"/>
                         </TabItem>
                         <TabItem Header="Chest" Name="AddedChestTab">
-                            <ListView ItemsSource="{Binding addedChests, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAddedChests, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Arm" Name="AddedArmTab">
-                            <ListView ItemsSource="{Binding addedArms, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAddedArms, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Waist" Name="AddedWaistTab">
-                            <ListView ItemsSource="{Binding addedWaists, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAddedWaists, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Leg" Name="AddedLegTab">
-                            <ListView ItemsSource="{Binding addedLegs, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAddedLegs, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                     </TabControl>
                 </TabItem>
                 <TabItem Header="Weapons" Name="AddedWeaponTab">
-                    <TabControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <TabControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="TabControlSelectionChanged">
                         <TabItem Header="Main" Name="AddedMainTab">
-                            <ListView ItemsSource="{Binding addedMains, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAddedMains, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                         <TabItem Header="Partial" Name="AddedPartialTab">
-                            <ListView ItemsSource="{Binding addedParts, Mode=TwoWay}" />
+                            <ListView ItemsSource="{Binding displayedAdded`Parts, Mode=TwoWay}" SelectionMode="Extended" />
                         </TabItem>
                     </TabControl>
                 </TabItem>

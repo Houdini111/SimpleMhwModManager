@@ -17,24 +17,40 @@ namespace MhwModManager
         private string originalName;
         private int originalOrder;
 
-        public ObservableCollection<Armor> possibleHeads { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> possibleChests { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> possibleArms { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> possibleWaists { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> possibleLegs { get; set; } = new ObservableCollection<Armor>();
+        #region Collections
+        public ObservableCollection<Armor> allHeads { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> allChests { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> allArms { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> allWaists { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> allLegs { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Weapon> allMain { get; set; } = new ObservableCollection<Weapon>();
+        public ObservableCollection<Weapon> allPart { get; set; } = new ObservableCollection<Weapon>();
 
-        public ObservableCollection<Weapon> possibleMain { get; set; } = new ObservableCollection<Weapon>();
-        public ObservableCollection<Weapon> possiblePart { get; set; } = new ObservableCollection<Weapon>();
+        public ObservableCollection<Armor> displayedAllHeads { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> displayedAllChests { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> displayedAllArms { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> displayedAllWaists { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> displayedAllLegs { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Weapon> displayedAllMain { get; set; } = new ObservableCollection<Weapon>();
+        public ObservableCollection<Weapon> displayedAllPart { get; set; } = new ObservableCollection<Weapon>();
 
         public ObservableCollection<Armor> addedHeads { get; set; } = new ObservableCollection<Armor>();
         public ObservableCollection<Armor> addedChests { get; set; } = new ObservableCollection<Armor>();
         public ObservableCollection<Armor> addedArms { get; set; } = new ObservableCollection<Armor>();
         public ObservableCollection<Armor> addedWaists { get; set; } = new ObservableCollection<Armor>();
         public ObservableCollection<Armor> addedLegs { get; set; } = new ObservableCollection<Armor>();
-        
         public ObservableCollection<Weapon> addedMain { get; set; } = new ObservableCollection<Weapon>();
         public ObservableCollection<Weapon> addedPart { get; set; } = new ObservableCollection<Weapon>();
-        
+
+        public ObservableCollection<Armor> displayedAddedHeads { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> displayedAddedChests { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> displayedAddedArms { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> displayedAddedWaists { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Armor> displayedAddedLegs { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<Weapon> displayedAddedMain { get; set; } = new ObservableCollection<Weapon>();
+        public ObservableCollection<Weapon> displayedAddedPart { get; set; } = new ObservableCollection<Weapon>();
+        #endregion
+
 
         public EditWindow(ModInfo info)
         {
@@ -47,24 +63,21 @@ namespace MhwModManager
             this.DataContext = this;
 
             #region Adding items
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD).ToList().ForEach(a => possibleHeads.Add(a));
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST).ToList().ForEach(a => possibleChests.Add(a));
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS).ToList().ForEach(a => possibleArms.Add(a));
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST).ToList().ForEach(a => possibleWaists.Add(a));
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS).ToList().ForEach(a => possibleLegs.Add(a));
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD).ToList().ForEach(a => { addedHeads.Add(a); displayedAddedHeads.Add(a); });
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST).ToList().ForEach(a => { addedChests.Add(a); displayedAddedChests.Add(a); });
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS).ToList().ForEach(a => { addedArms.Add(a); displayedAddedArms.Add(a); });
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST).ToList().ForEach(a => { addedWaists.Add(a); displayedAddedWaists.Add(a); });
+            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS).ToList().ForEach(a => { addedLegs.Add(a); displayedAddedLegs.Add(a); });
+            info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model)).ToList().ForEach(w => { addedMain.Add(w); displayedAddedMain.Add(w); });
+            info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model)).ToList().ForEach(w => { addedPart.Add(w); displayedAddedPart.Add(w); });
 
-            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model)).ToList().ForEach(w => possibleMain.Add(w));
-            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model)).ToList().ForEach(w => possiblePart.Add(w));
-            
-
-            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD).ToList().ForEach(a => addedHeads.Add(a));
-            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST).ToList().ForEach(a => addedChests.Add(a));
-            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS).ToList().ForEach(a => addedArms.Add(a));
-            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST).ToList().ForEach(a => addedWaists.Add(a));
-            info.replacedArmors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS).ToList().ForEach(a => addedLegs.Add(a));
-
-            info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model)).ToList().ForEach(w => addedMain.Add(w));
-            info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model)).ToList().ForEach(w => addedPart.Add(w));
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD && !allHeads.Contains(a)).ToList().ForEach(a => { allHeads.Add(a); displayedAllHeads.Add(a); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST && !allChests.Contains(a)).ToList().ForEach(a => { allChests.Add(a); displayedAllChests.Add(a); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS && !allArms.Contains(a)).ToList().ForEach(a => { allArms.Add(a); displayedAllArms.Add(a); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST && !allWaists.Contains(a)).ToList().ForEach(a => { allWaists.Add(a); displayedAllWaists.Add(a); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS && !allLegs.Contains(a)).ToList().ForEach(a => { allLegs.Add(a); displayedAllLegs.Add(a); });
+            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model) && !allMain.Contains(w)).ToList().ForEach(w => { allMain.Add(w); displayedAllMain.Add(w); });
+            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model) && !allPart.Contains(w)).ToList().ForEach(w => { allPart.Add(w); displayedAllPart.Add(w); });
             #endregion
 
             #region Tab visibility
@@ -153,33 +166,145 @@ namespace MhwModManager
 
         private void OnPossibleTextChanged(object sender, RoutedEventArgs e)
         {
-            string text = ((TextBox)sender).Text;
-            //possible = allChoices.FindAll(c => c.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0);
+            UpdatePossibleList();
         }
 
         private void OnAddedTextChanged(object sender, RoutedEventArgs e)
         {
-            string text = ((TextBox)sender).Text;
-            //selected = selectedChoices.FindAll(c => c.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0);
+            UpdateAddedList();
+        }
+
+        private void UpdatePossibleList()
+        {
+            string text = PossibleSearchBox.Text;
+
+            displayedAllHeads.Clear();
+            allHeads.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllHeads.Add(a));
+            displayedAllChests.Clear();
+            allChests.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllChests.Add(a));
+            displayedAllArms.Clear();
+            allArms.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllArms.Add(a));
+            displayedAllWaists.Clear();
+            allWaists.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllWaists.Add(a));
+            displayedAllLegs.Clear();
+            allLegs.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllLegs.Add(a));
+
+            displayedAllMain.Clear();
+            allMain.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAllMain.Add(w));
+            displayedAllPart.Clear();
+            allPart.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAllPart.Add(w));
+        }
+
+        private void UpdateAddedList()
+        {
+            string text = AddedSearchBox.Text;
+
+            displayedAddedHeads.Clear();
+            addedHeads.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedHeads.Add(a));
+            displayedAddedChests.Clear();
+            addedChests.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedChests.Add(a));
+            displayedAddedArms.Clear();
+            addedArms.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedArms.Add(a));
+            displayedAddedWaists.Clear();
+            addedWaists.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedWaists.Add(a));
+            displayedAddedLegs.Clear();
+            addedLegs.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedLegs.Add(a));
+
+            displayedAddedMain.Clear();
+            addedMain.Where(w => w.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAddedMain.Add(w));
+            displayedAddedPart.Clear();
+            addedPart.Where(w => w.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAddedPart.Add(w));
+        }
+
+        private void AddSetBTN_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void addBTN_Click(object sender, RoutedEventArgs e)
         {
+            TabControl childTabControl = PossibleTabControl.SelectedContent as TabControl;
+            ListView list = childTabControl.SelectedContent as ListView;
+            List<Item> items = list.SelectedItems.Cast<Item>().ToList();
 
+            if(items.Count > 0)
+            {
+                if(items[0] is Armor)
+                {
+                    Armor.ARMOR_SLOT slot = ((Armor)items[0]).type;
+                    ObservableCollection<Armor> toAddTo = null; //Remember, this is a shallow (reference) copy
+                    ObservableCollection<Armor> toRemoveFrom = null;
+                    if(slot == Armor.ARMOR_SLOT.HEAD) { toAddTo = addedHeads; toRemoveFrom = allHeads; }
+                    else if(slot == Armor.ARMOR_SLOT.CHEST) { toAddTo = addedChests; toRemoveFrom = allChests; }
+                    else if(slot == Armor.ARMOR_SLOT.ARMS) { toAddTo = addedArms; toRemoveFrom = allArms; }
+                    else if(slot == Armor.ARMOR_SLOT.WAIST) { toAddTo = addedWaists; toRemoveFrom = allWaists; }
+                    else if(slot == Armor.ARMOR_SLOT.LEGS) { toAddTo = addedLegs; toRemoveFrom = allLegs; }
+
+                    if(toAddTo != null)
+                    {
+                        items.ForEach(a => toAddTo.Add((Armor)a));
+                        items.ForEach(a => toRemoveFrom.Remove((Armor)a));
+
+                        UpdateAddedList();
+                        UpdatePossibleList();
+                    }
+                }
+                else if(items[0] is Weapon)
+                {
+                    //TODO
+                    //((Weapon)items[0]).weapon_type
+                }
+            }
         }
 
         private void removeBTN_Click(object sender, RoutedEventArgs e)
         {
 
         }
-        
+
+        private void RemoveSetBTN_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ResetBTN_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DefaultBTN_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void TabControlSelectionChanged(object sender, RoutedEventArgs e)
+        {
+            TabControl from = sender as TabControl;
+            TabControl to = null;
+            if(from == PossibleTabControl) { to = AddedTabControl; }
+            else if(from == AddedTabControl) { to = PossibleTabControl; }
+            else
+            {
+                TabItem parent = from.Parent as TabItem;
+                if(parent.Parent == PossibleTabControl) { to = ((TabItem)AddedTabControl.SelectedItem).Content as TabControl; }
+                else if(parent.Parent == AddedTabControl) { to = ((TabItem)PossibleTabControl.SelectedItem).Content as TabControl; }
+            }
+
+            if(from != null && to != null)
+            {
+                to.SelectionChanged -= TabControlSelectionChanged; //Prevent it from calling this function when it is changed from this code
+                to.SelectedIndex = from.SelectedIndex;
+                to.SelectionChanged += TabControlSelectionChanged;
+            }
+        }
+
         private void NumericInputPreviewer(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             try
             {
                 int parsed = Int32.Parse(e.Text);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 e.Handled = false;
             }
