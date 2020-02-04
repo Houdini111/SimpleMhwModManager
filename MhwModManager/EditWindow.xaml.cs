@@ -71,13 +71,13 @@ namespace MhwModManager
             info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model)).ToList().ForEach(w => { addedMain.Add(w); displayedAddedMain.Add(w); });
             info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model)).ToList().ForEach(w => { addedPart.Add(w); displayedAddedPart.Add(w); });
 
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD && !allHeads.Contains(a)).ToList().ForEach(a => { allHeads.Add(a); displayedAllHeads.Add(a); });
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST && !allChests.Contains(a)).ToList().ForEach(a => { allChests.Add(a); displayedAllChests.Add(a); });
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS && !allArms.Contains(a)).ToList().ForEach(a => { allArms.Add(a); displayedAllArms.Add(a); });
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST && !allWaists.Contains(a)).ToList().ForEach(a => { allWaists.Add(a); displayedAllWaists.Add(a); });
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS && !allLegs.Contains(a)).ToList().ForEach(a => { allLegs.Add(a); displayedAllLegs.Add(a); });
-            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model) && !allMain.Contains(w)).ToList().ForEach(w => { allMain.Add(w); displayedAllMain.Add(w); });
-            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model) && !allPart.Contains(w)).ToList().ForEach(w => { allPart.Add(w); displayedAllPart.Add(w); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD && !addedHeads.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allHeads.Add(a); displayedAllHeads.Add(a); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST && !addedChests.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allChests.Add(a); displayedAllChests.Add(a); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS && !addedArms.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allArms.Add(a); displayedAllArms.Add(a); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST && !addedWaists.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allWaists.Add(a); displayedAllWaists.Add(a); });
+            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS && !addedLegs.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allLegs.Add(a); displayedAllLegs.Add(a); });
+            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model) && !addedMain.Select(x => x.ID).Contains(w.ID)).ToList().ForEach(w => { allMain.Add(w); displayedAllMain.Add(w); });
+            App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model) && !addedPart.Select(x => x.ID).Contains(w.ID)).ToList().ForEach(w => { allPart.Add(w); displayedAllPart.Add(w); });
             #endregion
 
             #region Tab visibility
@@ -164,19 +164,15 @@ namespace MhwModManager
             Close();
         }
 
-        private void OnPossibleTextChanged(object sender, RoutedEventArgs e)
+        private void OnSearchTextChanged(object sender, RoutedEventArgs e)
         {
             UpdatePossibleList();
-        }
-
-        private void OnAddedTextChanged(object sender, RoutedEventArgs e)
-        {
             UpdateAddedList();
         }
-
+        
         private void UpdatePossibleList()
         {
-            string text = PossibleSearchBox.Text;
+            string text = SearchBox.Text;
 
             displayedAllHeads.Clear();
             allHeads.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllHeads.Add(a));
@@ -197,7 +193,7 @@ namespace MhwModManager
 
         private void UpdateAddedList()
         {
-            string text = AddedSearchBox.Text;
+            string text = SearchBox.Text;
 
             displayedAddedHeads.Clear();
             addedHeads.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedHeads.Add(a));

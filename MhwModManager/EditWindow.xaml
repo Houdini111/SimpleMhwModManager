@@ -82,7 +82,7 @@
                 </DataTemplate>
             </Grid.Resources>
 
-            <TextBox Name="PossibleSearchBox" Grid.Column="0" Grid.Row="0" Height="20" TextChanged="OnPossibleTextChanged"/>
+            <TextBox Name="SearchBox" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Height="20" TextChanged="OnSearchTextChanged"/>
 
             <TabControl Name="PossibleTabControl" Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="TabControlSelectionChanged">
                 <TabItem Header="Armor" Name="PossibleArmorTab">
@@ -115,7 +115,6 @@
                     </TabControl>
                 </TabItem>
             </TabControl>
-            <TextBox Name="AddedSearchBox" Grid.Column="2" Grid.Row="0" Height="20" TextChanged="OnAddedTextChanged" />
             <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
                 <Button Name="addSetBTN" Content="&gt;&gt;&gt;" Click="AddSetBTN_Click" Width="55" Padding="5" Margin="5" Style="{StaticResource RegularButton}" />
                 <Button Name="addBTN" Content="&gt;&gt;" Click="addBTN_Click" Width="55" Padding="5" Margin="5,5,5,30" Style="{StaticResource RegularButton}" />
