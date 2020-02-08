@@ -20,7 +20,7 @@ namespace MhwModManager
         public static Setting Settings = new Setting();
         public static string SettingsPath = Path.Combine(AppData, "settings.json");
         public static List<ModInfo> Mods;
-        public static List<Armor> armors;
+        public static Dictionary<Armor.ARMOR_SLOT, List<CombinedArmor>> armors;
         public static List<Weapon> weapons;
 
         public App()
@@ -58,7 +58,8 @@ namespace MhwModManager
             {
                 using (StreamReader file = new StreamReader("armor.json"))
                 {
-                    armors = JsonConvert.DeserializeObject<List<Armor>>(file.ReadToEnd());
+                    List<Armor> preArmors = JsonConvert.DeserializeObject<List<Armor>>(file.ReadToEnd());
+                    armors = CombineArmors(preArmors);
                 }
                 using (StreamReader file = new StreamReader("weapon.json"))
                 {
@@ -117,6 +118,163 @@ namespace MhwModManager
                     Process.Start("https://github.com/oxypomme/SimpleMhwModManager/releases/latest");
                 }
             }
+        }
+
+        private static Dictionary<Armor.ARMOR_SLOT, List<CombinedArmor>> CombineArmors(List<Armor> armor)
+        {
+            //Some armors use the same file location, and thus can't be separated
+            //e.g., Brigade Suit uses 
+            //  pl pl/m_equip/pl036_0000
+            //and
+            //  pl/f_equip/pl036_0000
+            //which is shared with both Brigade Suit α and Brigade Suit β.
+            //This is to combine them so that I don't present redundant and impossible choices
+
+            armor.RemoveAll(a => a.name.Contains("dummy"));
+            
+            Dictionary<Armor.ARMOR_SLOT, Dictionary<string, List<Armor>>> matches = new Dictionary<Armor.ARMOR_SLOT, Dictionary<string, List<Armor>>>();
+            matches.Add(Armor.ARMOR_SLOT.HEAD, new Dictionary<string, List<Armor>>());
+            matches.Add(Armor.ARMOR_SLOT.CHEST, new Dictionary<string, List<Armor>>());
+            matches.Add(Armor.ARMOR_SLOT.ARMS, new Dictionary<string, List<Armor>>());
+            matches.Add(Armor.ARMOR_SLOT.WAIST, new Dictionary<string, List<Armor>>());
+            matches.Add(Armor.ARMOR_SLOT.LEGS, new Dictionary<string, List<Armor>>());
+            List<Armor> exceptions = new List<Armor>();
+            foreach(Armor piece in armor)
+            {
+                Dictionary<string, List<Armor>> dict = matches[piece.type];
+                List<Armor> male;
+                List<Armor> female;
+
+                if(dict.ContainsKey(piece.male_location)) { male = dict[piece.male_location]; }
+                else
+                {
+                    male = new List<Armor>();
+                    dict[piece.male_location] = male;
+                }
+                if(dict.ContainsKey(piece.female_location)) { female = dict[piece.female_location]; }
+                else
+                {
+                    female = new List<Armor>();
+                    dict[piece.female_location] = female;
+                }
+
+                if(!male.Contains(piece)) { male.Add(piece); }
+                if(!female.Contains(piece)) { female.Add(piece); }
+            }
+
+            Dictionary<Armor.ARMOR_SLOT, Dictionary<string, List<Armor>>> combinedMatches = new Dictionary<Armor.ARMOR_SLOT, Dictionary<string, List<Armor>>>();
+            combinedMatches.Add(Armor.ARMOR_SLOT.HEAD, new Dictionary<string, List<Armor>>());
+            combinedMatches.Add(Armor.ARMOR_SLOT.CHEST, new Dictionary<string, List<Armor>>());
+            combinedMatches.Add(Armor.ARMOR_SLOT.ARMS, new Dictionary<string, List<Armor>>());
+            combinedMatches.Add(Armor.ARMOR_SLOT.WAIST, new Dictionary<string, List<Armor>>());
+            combinedMatches.Add(Armor.ARMOR_SLOT.LEGS, new Dictionary<string, List<Armor>>());
+            foreach(KeyValuePair<Armor.ARMOR_SLOT, Dictionary<string, List<Armor>>> slot in matches)
+            {
+                foreach(KeyValuePair<string, List<Armor>> location in slot.Value)
+                {
+                    Dictionary<string, List<Armor>> dict = combinedMatches[slot.Key];
+                    string loc = location.Key;
+                    if(loc.Equals("None", StringComparison.InvariantCultureIgnoreCase)) { continue; } //Because the armors with a "None" have a valid location in the other, they're already handled there
+                    string pairLoc;
+
+                    if(loc.Contains("m_equip")) { pairLoc = loc.Replace("m_equip", "f_equip"); }
+                    else { pairLoc = loc.Replace("f_equip", "m_equip"); }
+
+                    bool missingPair = false;
+                    foreach(Armor a in location.Value)
+                    {
+                        //Don't try to combine the matched pair if the "match" is "None"
+                        if(loc.Contains("m_equip") && a.female_location.Equals("None", StringComparison.InvariantCultureIgnoreCase)) { continue; } 
+                        else if(loc.Contains("f_equip") && a.male_location.Equals("None", StringComparison.InvariantCultureIgnoreCase)) { continue; } 
+
+                        //Sanity check to ensure that male and female always just pair exactly
+                        if(!slot.Value[pairLoc].Contains(a))
+                        {
+                            MessageBox.Show($"Male/Female variant not found at expected matched location for {a.name} with location {loc}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                            missingPair = true;
+                            break;
+                        }
+                    }
+                    if(!missingPair)
+                    {
+                        string m_loc = location.Value[0].male_location; //I'm just standardizing to male location. Shouldn't matter as logng as it is consistent
+                        List<Armor> list;
+                        if(dict.ContainsKey(m_loc)) { list = dict[m_loc]; }
+                        else
+                        {
+                            list = new List<Armor>();
+                            dict.Add(m_loc, list);
+                        }
+                        dict[m_loc] =  dict[m_loc].Union(location.Value).ToList();
+                    }
+                }
+            }
+
+            Dictionary<Armor.ARMOR_SLOT, List<CombinedArmor>> finalized = new Dictionary<Armor.ARMOR_SLOT, List<CombinedArmor>>();
+            finalized.Add(Armor.ARMOR_SLOT.HEAD, new List<CombinedArmor>());
+            finalized.Add(Armor.ARMOR_SLOT.CHEST, new List<CombinedArmor>());
+            finalized.Add(Armor.ARMOR_SLOT.ARMS, new List<CombinedArmor>());
+            finalized.Add(Armor.ARMOR_SLOT.WAIST, new List<CombinedArmor>());
+            finalized.Add(Armor.ARMOR_SLOT.LEGS, new List<CombinedArmor>());
+            foreach(KeyValuePair<Armor.ARMOR_SLOT, Dictionary<string, List<Armor>>> slotDict in combinedMatches)
+            {
+                List<CombinedArmor> list = finalized[slotDict.Key];
+                
+                foreach(KeyValuePair<string, List<Armor>> armorList in slotDict.Value)
+                {
+                    string combinedName = "";
+
+                    if(armorList.Value.Count == 1)
+                    {
+                        combinedName = armorList.Value[0].name;
+                    }
+                    else
+                    {
+                        List<string> names = armorList.Value.Select(a => a.name).ToList();
+
+                        int minLen = names.Select(name => name.Length).ToList().Min();
+                        int i = 0;
+                        for(; i < minLen; i++)
+                        {
+                            char thisChar = names[0][i];
+                            bool bad = false;
+                            foreach(string name in names)
+                            {
+                                if(name[i] != thisChar)
+                                {
+                                    bad = true;
+                                    break;
+                                }
+                            }
+                            if(bad) { break; }
+                        }
+                        if(i >= 0)
+                        {
+                            combinedName = names[0].Substring(0, i);
+                        }
+                        
+                        List<string> unique = new List<string>();
+                        foreach(string name in names)
+                        {
+                            string thisUnique = name.Substring(combinedName.Length).Trim();
+                            if(thisUnique.Length == 0) { thisUnique = "base"; }
+                            unique.Add(thisUnique);
+                        }
+
+                        if(combinedName.Length > 0)
+                        {
+                            combinedName += " (" + String.Join(", ", unique) + ")";
+                        }
+                        else
+                        {
+                            combinedName = String.Join(", ", unique);
+                        }
+                    }
+                    list.Add(new CombinedArmor(combinedName, armorList.Value)); //Pair armors under their combined name
+                }
+            }
+
+            return finalized;
         }
     }
     

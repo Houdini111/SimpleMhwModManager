@@ -18,35 +18,35 @@ namespace MhwModManager
         private int originalOrder;
 
         #region Collections
-        public ObservableCollection<Armor> allHeads { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> allChests { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> allArms { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> allWaists { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> allLegs { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<CombinedArmor> allHeads { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> allChests { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> allArms { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> allWaists { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> allLegs { get; set; } = new ObservableCollection<CombinedArmor>();
         public ObservableCollection<Weapon> allMain { get; set; } = new ObservableCollection<Weapon>();
         public ObservableCollection<Weapon> allPart { get; set; } = new ObservableCollection<Weapon>();
 
-        public ObservableCollection<Armor> displayedAllHeads { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> displayedAllChests { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> displayedAllArms { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> displayedAllWaists { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> displayedAllLegs { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<CombinedArmor> displayedAllHeads { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> displayedAllChests { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> displayedAllArms { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> displayedAllWaists { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> displayedAllLegs { get; set; } = new ObservableCollection<CombinedArmor>();
         public ObservableCollection<Weapon> displayedAllMain { get; set; } = new ObservableCollection<Weapon>();
         public ObservableCollection<Weapon> displayedAllPart { get; set; } = new ObservableCollection<Weapon>();
 
-        public ObservableCollection<Armor> addedHeads { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> addedChests { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> addedArms { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> addedWaists { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> addedLegs { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<CombinedArmor> addedHeads { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> addedChests { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> addedArms { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> addedWaists { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> addedLegs { get; set; } = new ObservableCollection<CombinedArmor>();
         public ObservableCollection<Weapon> addedMain { get; set; } = new ObservableCollection<Weapon>();
         public ObservableCollection<Weapon> addedPart { get; set; } = new ObservableCollection<Weapon>();
 
-        public ObservableCollection<Armor> displayedAddedHeads { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> displayedAddedChests { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> displayedAddedArms { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> displayedAddedWaists { get; set; } = new ObservableCollection<Armor>();
-        public ObservableCollection<Armor> displayedAddedLegs { get; set; } = new ObservableCollection<Armor>();
+        public ObservableCollection<CombinedArmor> displayedAddedHeads { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> displayedAddedChests { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> displayedAddedArms { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> displayedAddedWaists { get; set; } = new ObservableCollection<CombinedArmor>();
+        public ObservableCollection<CombinedArmor> displayedAddedLegs { get; set; } = new ObservableCollection<CombinedArmor>();
         public ObservableCollection<Weapon> displayedAddedMain { get; set; } = new ObservableCollection<Weapon>();
         public ObservableCollection<Weapon> displayedAddedPart { get; set; } = new ObservableCollection<Weapon>();
         #endregion
@@ -71,11 +71,11 @@ namespace MhwModManager
             info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model)).ToList().ForEach(w => { addedMain.Add(w); displayedAddedMain.Add(w); });
             info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model)).ToList().ForEach(w => { addedPart.Add(w); displayedAddedPart.Add(w); });
 
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.HEAD && !addedHeads.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allHeads.Add(a); displayedAllHeads.Add(a); });
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.CHEST && !addedChests.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allChests.Add(a); displayedAllChests.Add(a); });
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.ARMS && !addedArms.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allArms.Add(a); displayedAllArms.Add(a); });
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.WAIST && !addedWaists.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allWaists.Add(a); displayedAllWaists.Add(a); });
-            App.armors.Where(a => a.type == Armor.ARMOR_SLOT.LEGS && !addedLegs.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allLegs.Add(a); displayedAllLegs.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.HEAD].Where(!addedHeads.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allHeads.Add(a); displayedAllHeads.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.CHEST].Where(!addedChests.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allChests.Add(a); displayedAllChests.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.ARMS].Where(!addedArms.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allArms.Add(a); displayedAllArms.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.WAIST].Where(!addedWaists.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allWaists.Add(a); displayedAllWaists.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.LEGS].Where(!addedLegs.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allLegs.Add(a); displayedAllLegs.Add(a); });
             App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model) && !addedMain.Select(x => x.ID).Contains(w.ID)).ToList().ForEach(w => { allMain.Add(w); displayedAllMain.Add(w); });
             App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model) && !addedPart.Select(x => x.ID).Contains(w.ID)).ToList().ForEach(w => { allPart.Add(w); displayedAllPart.Add(w); });
             #endregion
@@ -228,8 +228,8 @@ namespace MhwModManager
                 if(items[0] is Armor)
                 {
                     Armor.ARMOR_SLOT slot = ((Armor)items[0]).type;
-                    ObservableCollection<Armor> toAddTo = null; //Remember, this is a shallow (reference) copy
-                    ObservableCollection<Armor> toRemoveFrom = null;
+                    ObservableCollection<CombinedArmor> toAddTo = null; //Remember, this is a shallow (reference) copy
+                    ObservableCollection<CombinedArmor> toRemoveFrom = null;
                     if(slot == Armor.ARMOR_SLOT.HEAD) { toAddTo = addedHeads; toRemoveFrom = allHeads; }
                     else if(slot == Armor.ARMOR_SLOT.CHEST) { toAddTo = addedChests; toRemoveFrom = allChests; }
                     else if(slot == Armor.ARMOR_SLOT.ARMS) { toAddTo = addedArms; toRemoveFrom = allArms; }
