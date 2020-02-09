@@ -231,9 +231,10 @@ namespace MhwModManager
                     else
                     {
                         List<string> names = armorList.Value.Select(a => a.name).ToList();
-
+                        
                         int minLen = names.Select(name => name.Length).ToList().Min();
                         int i = 0;
+                        int lastSplitable = 0;
                         for(; i < minLen; i++)
                         {
                             char thisChar = names[0][i];
@@ -247,10 +248,17 @@ namespace MhwModManager
                                 }
                             }
                             if(bad) { break; }
+                            else
+                            {
+                                if(thisChar == ' ' || thisChar == '\'')
+                                {
+                                    lastSplitable = i;
+                                }
+                            }
                         }
-                        if(i >= 0)
+                        if(lastSplitable >= 0)
                         {
-                            combinedName = names[0].Substring(0, i);
+                            combinedName = names[0].Substring(0, lastSplitable);
                         }
                         
                         List<string> unique = new List<string>();
@@ -284,9 +292,9 @@ namespace MhwModManager
         public bool activated { get; set; }
         public int order { get; set; }
         public string name { get; set; }
-        public List<Armor> originalReplacedArmors { get; set; }
+        public List<CombinedArmor> originalReplacedArmors { get; set; }
         public List<Weapon> originalReplacedWeapons { get; set; }
-        public List<Armor> replacedArmors { get; set; }
+        public List<CombinedArmor> replacedArmors { get; set; }
         public List<Weapon> replacedWeapons { get; set; }
 
         public void GenInfo(string path, int? index = null)
@@ -308,14 +316,16 @@ namespace MhwModManager
                 var foldName = path.Split('\\');
                 name = foldName[foldName.GetLength(0) - 1].Split('.')[0];
                 
-                replacedArmors = App.armors.FindAll(a => 
-                    (Directory.Exists(Path.Combine(path, a.male_location)) && !String.IsNullOrWhiteSpace(a.male_location)) || 
+                replacedArmors = App.armors.ToList().SelectMany(slotList => slotList.Value).Where(a =>
+                    (Directory.Exists(Path.Combine(path, a.male_location)) && !String.IsNullOrWhiteSpace(a.male_location)) ||
                     (Directory.Exists(Path.Combine(path, a.female_location)) && !String.IsNullOrWhiteSpace(a.female_location))).ToList();
                 replacedWeapons = App.weapons.FindAll(w => 
                     Directory.Exists(Path.Combine(path, w.main_model)) || 
                     (Directory.Exists(Path.Combine(path, w.part_model)) && !String.IsNullOrWhiteSpace(w.part_model))).ToList();
-                originalReplacedArmors = replacedArmors;
-                originalReplacedWeapons = replacedWeapons;
+                originalReplacedArmors = new List<CombinedArmor>();
+                originalReplacedArmors.AddRange(replacedArmors);
+                originalReplacedWeapons = new List<Weapon>();
+                originalReplacedWeapons.AddRange(replacedWeapons);
 
                 SaveSettingsJSON(path);
             }

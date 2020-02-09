@@ -71,11 +71,11 @@ namespace MhwModManager
             info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model)).ToList().ForEach(w => { addedMain.Add(w); displayedAddedMain.Add(w); });
             info.replacedWeapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model)).ToList().ForEach(w => { addedPart.Add(w); displayedAddedPart.Add(w); });
 
-            App.armors[Armor.ARMOR_SLOT.HEAD].Where(!addedHeads.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allHeads.Add(a); displayedAllHeads.Add(a); });
-            App.armors[Armor.ARMOR_SLOT.CHEST].Where(!addedChests.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allChests.Add(a); displayedAllChests.Add(a); });
-            App.armors[Armor.ARMOR_SLOT.ARMS].Where(!addedArms.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allArms.Add(a); displayedAllArms.Add(a); });
-            App.armors[Armor.ARMOR_SLOT.WAIST].Where(!addedWaists.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allWaists.Add(a); displayedAllWaists.Add(a); });
-            App.armors[Armor.ARMOR_SLOT.LEGS].Where(!addedLegs.Select(x => x.ID).Contains(a.ID)).ToList().ForEach(a => { allLegs.Add(a); displayedAllLegs.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.HEAD].Where(a => !addedHeads.Contains(a)).ToList().ForEach(a => { allHeads.Add(a); displayedAllHeads.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.CHEST].Where(a => !addedHeads.Contains(a)).ToList().ForEach(a => { allChests.Add(a); displayedAllChests.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.ARMS].Where(a => !addedHeads.Contains(a)).ToList().ForEach(a => { allArms.Add(a); displayedAllArms.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.WAIST].Where(a => !addedHeads.Contains(a)).ToList().ForEach(a => { allWaists.Add(a); displayedAllWaists.Add(a); });
+            App.armors[Armor.ARMOR_SLOT.LEGS].Where(a => !addedHeads.Contains(a)).ToList().ForEach(a => { allLegs.Add(a); displayedAllLegs.Add(a); });
             App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.main_model) && !addedMain.Select(x => x.ID).Contains(w.ID)).ToList().ForEach(w => { allMain.Add(w); displayedAllMain.Add(w); });
             App.weapons.Where(w => !String.IsNullOrWhiteSpace(w.part_model) && !addedPart.Select(x => x.ID).Contains(w.ID)).ToList().ForEach(w => { allPart.Add(w); displayedAllPart.Add(w); });
             #endregion
@@ -175,20 +175,20 @@ namespace MhwModManager
             string text = SearchBox.Text;
 
             displayedAllHeads.Clear();
-            allHeads.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllHeads.Add(a));
+            allHeads.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllHeads.Add(a));
             displayedAllChests.Clear();
-            allChests.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllChests.Add(a));
+            allChests.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllChests.Add(a));
             displayedAllArms.Clear();
-            allArms.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllArms.Add(a));
+            allArms.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllArms.Add(a));
             displayedAllWaists.Clear();
-            allWaists.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllWaists.Add(a));
+            allWaists.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllWaists.Add(a));
             displayedAllLegs.Clear();
-            allLegs.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllLegs.Add(a));
+            allLegs.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAllLegs.Add(a));
 
             displayedAllMain.Clear();
-            allMain.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAllMain.Add(w));
+            allMain.Where(w => w.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAllMain.Add(w));
             displayedAllPart.Clear();
-            allPart.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAllPart.Add(w));
+            allPart.Where(w => w.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAllPart.Add(w));
         }
 
         private void UpdateAddedList()
@@ -196,15 +196,15 @@ namespace MhwModManager
             string text = SearchBox.Text;
 
             displayedAddedHeads.Clear();
-            addedHeads.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedHeads.Add(a));
+            addedHeads.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedHeads.Add(a));
             displayedAddedChests.Clear();
-            addedChests.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedChests.Add(a));
+            addedChests.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedChests.Add(a));
             displayedAddedArms.Clear();
-            addedArms.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedArms.Add(a));
+            addedArms.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedArms.Add(a));
             displayedAddedWaists.Clear();
-            addedWaists.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedWaists.Add(a));
+            addedWaists.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedWaists.Add(a));
             displayedAddedLegs.Clear();
-            addedLegs.Where(a => a.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedLegs.Add(a));
+            addedLegs.Where(a => a.combinedName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(a => displayedAddedLegs.Add(a));
 
             displayedAddedMain.Clear();
             addedMain.Where(w => w.name.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList().ForEach(w => displayedAddedMain.Add(w));
@@ -221,34 +221,31 @@ namespace MhwModManager
         {
             TabControl childTabControl = PossibleTabControl.SelectedContent as TabControl;
             ListView list = childTabControl.SelectedContent as ListView;
-            List<Item> items = list.SelectedItems.Cast<Item>().ToList();
-
-            if(items.Count > 0)
+            
+            if(list.SelectedItem is Weapon)
             {
-                if(items[0] is Armor)
-                {
-                    Armor.ARMOR_SLOT slot = ((Armor)items[0]).type;
-                    ObservableCollection<CombinedArmor> toAddTo = null; //Remember, this is a shallow (reference) copy
-                    ObservableCollection<CombinedArmor> toRemoveFrom = null;
-                    if(slot == Armor.ARMOR_SLOT.HEAD) { toAddTo = addedHeads; toRemoveFrom = allHeads; }
-                    else if(slot == Armor.ARMOR_SLOT.CHEST) { toAddTo = addedChests; toRemoveFrom = allChests; }
-                    else if(slot == Armor.ARMOR_SLOT.ARMS) { toAddTo = addedArms; toRemoveFrom = allArms; }
-                    else if(slot == Armor.ARMOR_SLOT.WAIST) { toAddTo = addedWaists; toRemoveFrom = allWaists; }
-                    else if(slot == Armor.ARMOR_SLOT.LEGS) { toAddTo = addedLegs; toRemoveFrom = allLegs; }
 
-                    if(toAddTo != null)
-                    {
-                        items.ForEach(a => toAddTo.Add((Armor)a));
-                        items.ForEach(a => toRemoveFrom.Remove((Armor)a));
+            }
+            else if(list.SelectedItem is CombinedArmor)
+            {
+                List<CombinedArmor> items = list.SelectedItems.Cast<CombinedArmor>().ToList();
 
-                        UpdateAddedList();
-                        UpdatePossibleList();
-                    }
-                }
-                else if(items[0] is Weapon)
+                Armor.ARMOR_SLOT slot = items[0].type;
+                ObservableCollection<CombinedArmor> toAddTo = null; //Remember, this is a shallow (reference) copy
+                ObservableCollection<CombinedArmor> toRemoveFrom = null;
+                if(slot == Armor.ARMOR_SLOT.HEAD) { toAddTo = addedHeads; toRemoveFrom = allHeads; }
+                else if(slot == Armor.ARMOR_SLOT.CHEST) { toAddTo = addedChests; toRemoveFrom = allChests; }
+                else if(slot == Armor.ARMOR_SLOT.ARMS) { toAddTo = addedArms; toRemoveFrom = allArms; }
+                else if(slot == Armor.ARMOR_SLOT.WAIST) { toAddTo = addedWaists; toRemoveFrom = allWaists; }
+                else if(slot == Armor.ARMOR_SLOT.LEGS) { toAddTo = addedLegs; toRemoveFrom = allLegs; }
+
+                if(toAddTo != null)
                 {
-                    //TODO
-                    //((Weapon)items[0]).weapon_type
+                    items.ForEach(a => toAddTo.Add(a));
+                    items.ForEach(a => toRemoveFrom.Remove(a));
+
+                    UpdateAddedList();
+                    UpdatePossibleList();
                 }
             }
         }
